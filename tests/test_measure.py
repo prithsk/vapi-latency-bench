@@ -30,7 +30,7 @@ assert measure.turn_latencies_ms([{"role":"user","time":1,"endTime":5},{"role":"
 assert measure.turn_latencies_ms([{"role":"user","time":1,"endTime":10},{"role":"bot","time":8}]) == []
 # config parsing + assistant payload
 cfgs = config.load_all(str(Path(__file__).parent.parent / "configs"))
-assert len(cfgs) == 6
+assert len([c for c in cfgs if not c["name"].startswith("tune-")]) == 6 and len(cfgs) == 9
 tw = [c for c in cfgs if c["telephony"] == "twilio"]; assert len(tw) == 3
 assert {c["telephony"] for c in cfgs} == {"vapi", "twilio"}
 p = config.target_payload(cfgs[0])
@@ -46,4 +46,11 @@ assert all(q in cp["model"]["messages"][0]["content"] for q in config.SCRIPT)
 fb = [{"role":"user","secondsFromStart":2.0,"duration":800},{"role":"bot","secondsFromStart":3.45}]
 assert measure.turn_latencies_ms(fb) == [650.0], measure.turn_latencies_ms(fb)
 assert len(config.SCRIPT) == 6
+
+tc = {c["name"]: c for c in config.load_all(str(Path(__file__).parent.parent / "configs"))}
+d = config.target_payload(tc["tune-0-default-vapi"]); assert "startSpeakingPlan" not in d
+w = config.target_payload(tc["tune-1-wait0-vapi"]); assert w["startSpeakingPlan"] == {"waitSeconds": 0} and w["voice"]["model"] == "eleven_turbo_v2_5"
+e = config.target_payload(tc["tune-2-wait0-endpointing-vapi"]); assert e["startSpeakingPlan"]["transcriptionEndpointingPlan"]["onNoPunctuationSeconds"] == 0.8
+assert {k: v for k, v in d.items() if k != "name"} == {k: v for k, v in w.items() if k not in ("name", "startSpeakingPlan")}   # only the knob differs
+print("tuning tests passed")
 print("all tests passed")

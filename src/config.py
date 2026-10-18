@@ -1,4 +1,10 @@
+import json
 from pathlib import Path
+
+def _merge(a, b):
+    for k, v in b.items():
+        a[k] = _merge(a.get(k, {}), v) if isinstance(v, dict) and isinstance(a.get(k), dict) else v
+    return a
 
 def load(path):
     rows = {}
@@ -42,7 +48,7 @@ def target_payload(cfg):
                       "Never ask questions. Never call tools."}]},
         "voice": _voice(cfg),
         "maxDurationSeconds": 150,
-    }
+    } if not cfg.get("extra") else _merge(target_payload({**cfg, "extra": ""}), json.loads(cfg["extra"]))
 
 def caller_payload():
     """The scripted 'user'. It sits on the callee number, waits, then asks the six questions in order."""

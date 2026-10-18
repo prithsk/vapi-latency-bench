@@ -61,6 +61,8 @@ def table(rows):
 
 def main(dry_run=False):
     cfgs = config.load_all(ROOT / "configs")
+    only = [a.split("=", 1)[1] for a in sys.argv if a.startswith("--only=")]
+    if only: cfgs = [c for c in cfgs if any(o in c["name"] for o in only[0].split(","))]
     if dry_run:
         print(table([run_config(c, True) for c in cfgs])); return
     for k in ("VAPI_API_KEY", "VAPI_CALLEE_NUMBER_ID", "VAPI_CALLEE_NUMBER", "VAPI_FROM_NUMBER_ID"):
