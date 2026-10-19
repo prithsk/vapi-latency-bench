@@ -59,7 +59,7 @@ tests/test_measure.py
 
 ## Caveats
 
-Ten calls is enough to see p50 and the shape of p95. It is not enough for p99 to mean much; that column is there for the tail. Provider latency drifts over the day, so results are dated and a run is a snapshot. Rerun before you cite.
+Each config gets 10 calls of about 6 turns, roughly 60 measured turns. That is enough for a solid p50 and a usable p95. At 60 turns, p99 is essentially the single slowest turn, so read it as one worst-case sample. Provider latency drifts over the day, so results are dated and a run is a snapshot. Rerun before you cite.
 
 ## License
 
